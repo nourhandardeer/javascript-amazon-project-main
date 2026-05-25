@@ -7,6 +7,7 @@ function generateQuantityOptions() {
   return options;
 }
 
+
 function renderProduct(product) {
   return `
     <div class="product-container">
@@ -20,9 +21,9 @@ function renderProduct(product) {
         <img class="product-rating-stars" src="images/ratings/rating-${product.rating.stars * 10}.png" >
         <div class="product-rating-count link-primary">${product.rating.count}</div>
       </div>
-      <div class="product-price">${(product.priceCents/100).toFixed(2)+"$"}</div>
+      <div class="product-price">$${(product.priceCents/100).toFixed(2)}</div>
       <div class="product-quantity-container">
-        <select>${generateQuantityOptions()}</select>
+        <select class="js-quantity-selector-${product.id}">${generateQuantityOptions()}</select>
       </div>
       <div class="product-spacer"></div>
       <div class="added-to-cart" id="${product.id}">
@@ -39,7 +40,28 @@ function addToCart(productId) {
   const addedMsg = document.getElementById(productId);
   addedMsg.classList.add('visible');
   setTimeout(() => addedMsg.classList.remove('visible'), 2000);
+  const product = products.find((item) => {
+    return item.id === productId;
+  });
+  const quantitySelector = document.querySelector(`.js-quantity-selector-${productId}`);
+  cart.push({name: product.name, priceCents: product.priceCents, image: product.image, quantity: parseInt(quantitySelector.value)});
+  localStorage.setItem('cart', JSON.stringify(cart));
+  console.log(cart);
+  updateCartQuantity();
 }
+
+function updateCartQuantity() {
+  let totalQuantity = 0;
+
+  cart.forEach(item => {
+    totalQuantity += item.quantity;
+  });
+
+  document.querySelector('.cart-quantity').textContent =
+    totalQuantity;
+}
+updateCartQuantity();
+
 
 // Render all products into the grid
 document.querySelector('.products-grid').innerHTML = products.map(renderProduct).join('');
